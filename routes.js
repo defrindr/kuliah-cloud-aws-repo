@@ -60,7 +60,7 @@ const routes = [
                 if(id === "") return h.response({message: 'param cant be empty'}).code(400);
                 let infos = await note.findOne({where: {id}});
                 if(!infos)  return h.response({message: 'Data #'+id+' not found'}).code(404);
-                let result = await note.delete({where: {id}});
+                let result = await note.destroy({where: {id}});
                 console.log(result);
                 return h.response({'message': 'success delete #' + id}).code(201);
             } catch(e) {
