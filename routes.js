@@ -1,46 +1,72 @@
+const note = require('./model/note.js');
 const routes = [
     {
-        method: '*',
+        method: 'GET',
         path: '/',
-        handler: (request, h) => {
-            let params = request.query
-            let infos = [{id: '1', content: 'dummy'}];
+        handler: async (request, h) => {
+            let infos = await note.findAll();
             return h.response({message: 'Success get data', data: infos});
         },
     },
     {
         method: 'GET',
         path: '/{id}',
-        handler: (request, h) => {
+        handler: async(request, h) => {
             let id = request.params.id;
             if(id === "") return h.response({message: 'param cant be empty'}).code(400);
-            let infos = {id, content: 'dummy'};
+            let infos = await note.findOne({where: {id}});
+            if(!infos)  return h.response({message: 'Data #'+id+' not found'}).code(404);
             return h.response({message: 'Success get data', data: infos});
         },
     },
     {
         method: 'POST',
         path: '/',
-        handler: (request, h) => {
-            return h.response({'message': 'success create'}).code(201);
+        handler: async (request, h) => {
+            try {
+                let newNote = new note(request.payload);
+                await newNote.save();
+                return h.response({'message': 'success create'}).code(201);
+            } catch(e) {
+                console.log(e);
+                return h.response({'message': 'Error handle request'}).code(500);
+            }
         },
     },
     {
         method: 'PUT',
         path: '/{id}',
-        handler: (request, h) => {
-            let id = request.params.id;
-            if(id === "") return h.response({message: 'param cant be empty'}).code(400);
-            return h.response({'message': 'success update #' +id}).code(200);
+        handler: async(request, h) => {
+            try {
+                let id = request.params.id;
+                if(id === "") return h.response({message: 'param cant be empty'}).code(400);
+                let infos = await note.findOne({where: {id}});
+                if(!infos)  return h.response({message: 'Data #'+id+' not found'}).code(404);
+                let result = await note.update(request.payload, {where: {id}});
+                console.log(result);
+                return h.response({'message': 'success update #' + id}).code(201);
+            } catch(e) {
+                console.log(e);
+                return h.response({'message': 'Error handle request'}).code(500);
+            }
         },
     },
     {
         method: 'DELETE',
         path: '/{id}',
-        handler: (request, h) => {
-            let id = request.params.id;
-            if(id === "") return h.response({message: 'param cant be empty'}).code(400);
-            return h.response({'message': 'success delete #' +id}).code(200);
+        handler: async(request, h) => {
+            try {
+                let id = request.params.id;
+                if(id === "") return h.response({message: 'param cant be empty'}).code(400);
+                let infos = await note.findOne({where: {id}});
+                if(!infos)  return h.response({message: 'Data #'+id+' not found'}).code(404);
+                let result = await note.delete({where: {id}});
+                console.log(result);
+                return h.response({'message': 'success delete #' + id}).code(201);
+            } catch(e) {
+                console.log(e);
+                return h.response({'message': 'Error handle request'}).code(500);
+            }
         },
     },
 ];
